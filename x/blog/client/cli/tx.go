@@ -2,11 +2,13 @@ package cli
 
 import (
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/tx"
 	// "github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/ivyxjc/blog/x/blog/types"
 )
@@ -28,8 +30,34 @@ func GetTxCmd() *cobra.Command {
 		SuggestionsMinimumDistance: 2,
 		RunE:                       client.ValidateCmd,
 	}
+	cmd.AddCommand(CmdCreatePost())
+	return cmd
+}
 
-	// this line is used by starport scaffolding # 1
+func CmdCreatePost() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "create-post [title] [body]",
+		Short: "Creates a new post",
+		Args:  cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			argsTitle := args[0]
+			argsBody := args[1]
 
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgCreatePost(clientCtx.GetFromAddress().String(),
+				argsTitle,
+				argsBody)
+
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+	flags.AddTxFlagsToCmd(cmd)
 	return cmd
 }
