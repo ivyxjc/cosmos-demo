@@ -42,7 +42,7 @@ func (k Keeper) CreatePost(ctx sdk.Context, msg types.MsgCreatePost) {
 	key := types.KeyPrefix(types.PostKey + post.Id)
 	value := k.cdc.MustMarshal(&post)
 	store.Set(key, value)
-	k.SetPostCount(ctx, count+1)
+	k.SetPostCount(ctx, count+100)
 }
 
 func (k Keeper) GetPost(ctx sdk.Context, key string) types.Post {
